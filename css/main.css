@@ -108,7 +108,7 @@ ul li {
   background-color: #292c47; }
   #header.fixed .header-content {
     border-bottom: 0;
-    padding: 25px 0; }
+    padding: 15px 0; }
   #header.fixed .nav-toggle {
     top: 18px; }
 
@@ -826,13 +826,52 @@ ul li {
 .icon-dribbble:before {
   content: "\e063"; }
 
+#extra-features{padding:140px 0;min-height:750px;background: #fff !important;}
 
-  .text-white *{color:#fff !important;}
-  .text-orange {color:#e84545 !important;}
-  
-  .UL_services li::before {
+#extra-features *{color:#000 !important;}
+
+.text-orange {color:#e84545 !important;}
+
+.UL_services li::before {
     content: "✓";
     font-weight: 600;
     padding-right: 10px;
     color:#e84545;
 }
+
+#features{
+  padding: 140px 0;
+  background: url(../images/services-bg1.jpg);
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+#features *{color:#fff;}
+
+hr {
+  height: 4px;
+  width: 70px;
+  text-align: center;
+  position: relative;
+  background: #e84545;
+  margin: 0 auto;
+  margin-bottom: 30px;
+  border: 0;
+}
+
+.section{min-height: 750px;}
+
+.feature .icon{
+  color:#e84545 !important;
+}
+
+.section-title h2{
+margin-bottom:30px;
+font-size: 30px;
+text-transform: uppercase;
+line-height: 20px;
+font-weight: 600;
+letter-spacing: 1px;
+}
+
+.section-title{padding:20px;}
