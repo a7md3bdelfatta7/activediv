@@ -110,7 +110,7 @@ ul li {
     border-bottom: 0;
     padding: 15px 0; }
   #header.fixed .nav-toggle {
-    top: 18px; }
+    top: 5px; }
 
 .navigation.open {
   opacity: 0.9;
@@ -382,11 +382,11 @@ ul li {
   .social-icons li, .footer .footer-share li {
     float: left; }
   .social-icons a, .footer .footer-share a {
-    border: 1px solid #e8ecee;
+    border: 2px solid #fff;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
     border-radius: 2px;
-    color: #c6cacc;
+    //color: #c6cacc;
     display: block;
     font-size: 18px;
     height: 40px;
@@ -841,13 +841,13 @@ ul li {
 
 #features{
   padding: 140px 0;
-  background: url(../images/services-bg1.jpg);
+  background: url(../images/services-bg.jpg);
   background-size: cover;
   background-attachment: fixed;
 }
 
 #features *{color:#fff;}
-
+#features .feature{margin-top:50px;}
 hr {
   height: 4px;
   width: 70px;
@@ -875,3 +875,18 @@ letter-spacing: 1px;
 }
 
 .section-title{padding:20px;}
+
+#teams{background:#e6e6e6}
+.person{margin:0px auto;}
+.person img{border-radius: 50%;width: 150px;margin: 0px auto;border:2px solid #fff;}
+.person .person-content{text-align: center;}
+
+.person ul.social-icons{
+  display: block;
+  text-align: center;
+}
+
+.social-icons li, .footer .footer-share li{
+  display: inline-block;float: none;
+}
+
