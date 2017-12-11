@@ -828,3 +828,11 @@ ul li {
 
 
   .text-white *{color:#fff !important;}
+  .text-orange {color:#e84545 !important;}
+  
+  .UL_services li::before {
+    content: "✓";
+    font-weight: 600;
+    padding-right: 10px;
+    color:#e84545;
+}
