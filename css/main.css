@@ -878,7 +878,7 @@ letter-spacing: 1px;
 
 #teams{background:#e6e6e6}
 .person{margin:0px auto;}
-.person img{border-radius: 50%;width: 150px;margin: 0px auto;border:2px solid #fff;}
+.person img{border-radius: 50%;width: 200px;margin: 0px auto;border:2px solid #fff;}
 .person .person-content{text-align: center;}
 
 .person ul.social-icons{
