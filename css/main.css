@@ -890,3 +890,28 @@ letter-spacing: 1px;
   display: inline-block;float: none;
 }
 
+.footer *{
+  color:#fff !important;
+}
+
+.footer p{font-size:18px;}
+
+.footer .fa{
+  color:#e84545 !important;
+  margin-bottom:15px;
+  font-size: 30px;
+}
+
+
+
+
+.footer-share .fa{
+  color:#fff !important;
+  font-size: 18px;
+}
+
+.footer-bottom p{
+  margin-top:15px;
+  font-size: 15px;  
+}
+
