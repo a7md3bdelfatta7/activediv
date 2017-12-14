@@ -915,3 +915,7 @@ letter-spacing: 1px;
   font-size: 15px;  
 }
 
+.fa-android, .fa-apple, .fa-mobile, .fa-database, .fa-laptop,.fa-desktop{
+  font-size: 90px !important;
+  color:#e84545 !important;
+}
