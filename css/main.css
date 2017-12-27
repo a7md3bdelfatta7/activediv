@@ -65,7 +65,8 @@ a:hover, a:focus {
 body {
   font-family: "Raleway", sans-serif;
   font-weight: 400;
-  color: #6c7279; }
+  color: #6c7279; 
+padding:0px;margin:0px;}
 
 ul, ol {
   margin: 0;
@@ -918,4 +919,8 @@ letter-spacing: 1px;
 .fa-android, .fa-apple, .fa-mobile, .fa-database, .fa-laptop,.fa-desktop{
   font-size: 90px !important;
   color:#e84545 !important;
+}
+#container{
+overflow:hidden !important;
+overflow-y:hidden !important;
 }

@@ -83,4 +83,5 @@ $(document).ready(function() {
 		$('.nav-toggle').toggleClass('close-nav');
 		nav.toggleClass('open');
 	});
+	$("#imgContainer img").css("margin-left", "-1024px");
 });
