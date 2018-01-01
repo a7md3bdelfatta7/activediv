@@ -1,0 +1,92 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <section id="section" class="light nopad-t nopad-b">
+
+        <div class="row">
+
+            <div class="col-12">
+
+                <div id="face" class="face">
+
+                    <a href="/portfolio">
+                        <div id="designer" class="designer" style="opacity: 1;">
+                            <div id="designer-desc" class="description" style="opacity: 1;">
+                                <h1>designer</h1>
+                                <p>UI/UX Designer with a passion for designing beautiful and functional user experiences.</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="/about">
+                        <div id="coder" class="coder" style="opacity: 1;">
+                            <div id="coder-desc" class="description" style="opacity: 1;">
+                                <h1>&lt;coder&gt;</h1>
+                                <p>Front End Developer who focuses on writing clean, elegant and efficient code.</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <img id="face-img" class="face-img" src="http://www.adhamdannaway.com/wp-content/themes/dannaway/images/adham-dannaway-designer-coder.jpg"
+                        alt="adham dannaway ui designer" style="display: none;">
+
+                    <div id="designer-img" class="designer-img" style="left: 100px; opacity: 1; width: 420px;"></div>
+                    <div id="coder-img" class="coder-img" style="right: 100px; opacity: 1; width: 420px;"></div>
+                    <div id="designer-bg" class="designer-bg" style="left: 100px; opacity: 1;"></div>
+                    <div id="coder-bg" class="coder-bg" style="right: 100px; opacity: 1;"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script src="js/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#coder-desc").mouseenter(function () {
+                $("#coder-img").animate({ right:180,width:820},{ duration: 1000, queue: false });
+                $("#designer-img").animate({ width:0,left:20},{ duration: 1040, queue: false });
+                $("#designer-desc").fadeOut();
+                $("#designer-bg").fadeOut();
+
+            });
+
+            $("#coder-desc").mouseleave(function () {
+                $("#designer-img").animate({ width: 420,left:100},{ duration: 1000, queue: false });
+                $("#coder-img").animate({ width: 420,right:100},{ duration: 1040, queue: false });
+                $("#designer-desc").fadeIn();
+                $("#designer-bg").fadeIn();
+            });
+
+
+            $("#designer-desc").mouseenter(function () {
+                $("#designer-img").animate({ left:180,width:820},{ duration: 1000, queue: false });
+                $("#coder-img").animate({ width:0,right:20},{ duration: 1040, queue: false });
+                $("#coder-desc").fadeOut();
+                $("#coder-bg").fadeOut();
+
+            });
+
+            $("#designer-desc").mouseleave(function () {
+                $("#coder-img").animate({ width: 420,right:100},{ duration: 1000, queue: false });
+                $("#designer-img").animate({ width: 420,left:100},{ duration: 1040, queue: false });
+                $("#coder-desc").fadeIn();
+                $("#coder-bg").fadeIn();
+            });
+
+
+
+
+        });
+    </script>
+</body>
+
+</html>

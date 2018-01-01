@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway:300,400,500,600,700);
 @import url(http://fonts.googleapis.com/css?family=Cardo:400,400italic,700);
 /* ==========================================================================
-Typography
+Typographyx`
 ========================================================================== */
 p {
   font-size: 14px;
@@ -9,7 +9,7 @@ p {
   color: #6c7279; }
 
 h1 {
-  font-size: 65px;
+  font-size: 60px;
   color: #2d3033; }
 
 h2 {
@@ -66,7 +66,9 @@ body {
   font-family: "Raleway", sans-serif;
   font-weight: 400;
   color: #6c7279; 
-padding:0px;margin:0px;}
+  padding:0px;margin:0px;
+  overflow-y: hidden;
+}
 
 ul, ol {
   margin: 0;
@@ -76,7 +78,7 @@ ul li {
   list-style: none; }
 
 .section {
-  padding: 100px 0; }
+  padding: 30px 0; }
 
 .no-padding {
   padding: 0; }
@@ -131,19 +133,20 @@ ul li {
     font-weight: 700;
     margin-left: 40px;
     text-transform: uppercase; }
-    .navigation a:hover, .navigation a.active {
-      color: #fff; }
+    .navigation a:hover{color:#fff;}
+     .navigation a.active {
+      color: #e84545; }
 
 .nav-toggle {
   display: none;
-  height: 44px;
+  height: 40px;
   overflow: hidden;
   position: fixed;
   right: 5%;
   text-indent: 100%;
   top: 32px;
   white-space: nowrap;
-  width: 44px;
+  width: 40px;
   z-index: 99999;
   -moz-transition: all 0.3s;
   -o-transition: all 0.3s;
@@ -268,10 +271,10 @@ ul li {
   -o-background-size: cover;
   -webkit-background-size: cover;
   background-size: cover;
-  min-height: 750px; }
+  height: 100vh; }
 
 .banner-text {
-  padding-top: 25%; }
+  padding-top: 30%; }
   .banner-text h1 {
     color: #fff;
     font-family: "Open Sans", sans-serif;
@@ -279,7 +282,7 @@ ul li {
     text-transform: uppercase; }
   .banner-text p {
     color: #fff;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 300;
     line-height: 1.5;
     margin-bottom: 80px; }
@@ -363,7 +366,7 @@ ul li {
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0); }
 
-/* ==========================================================================
+/* ===========================================.navigation a:hover, .navigation a.active===============================
 	$Teams
 ========================================================================== */
 .person {
@@ -827,10 +830,10 @@ ul li {
 .icon-dribbble:before {
   content: "\e063"; }
 
-#extra-features{padding:140px 0;min-height:750px;background: #fff !important;}
+#aboutus{min-height:750px;background: #fff !important;}
 
-#extra-features *{color:#000 !important;}
-
+#aboutus *{color:#000 !important;}
+#aboutus img{max-width:100%;height:auto;}
 .text-orange {color:#e84545 !important;}
 
 .UL_services li::before {
@@ -840,15 +843,14 @@ ul li {
     color:#e84545;
 }
 
-#features{
-  padding: 140px 0;
+#services{
   background: url(../images/services-bg.jpg);
   background-size: cover;
   background-attachment: fixed;
 }
 
-#features *{color:#fff;}
-#features .feature{margin-top:50px;}
+#services *{color:#fff;}
+#services .feature{margin-top:50px;}
 hr {
   height: 4px;
   width: 70px;
@@ -868,9 +870,9 @@ hr {
 
 .section-title h2{
 margin-bottom:30px;
-font-size: 30px;
+font-size: 25px;
 text-transform: uppercase;
-line-height: 20px;
+line-height: 40px;
 font-weight: 600;
 letter-spacing: 1px;
 }
@@ -922,5 +924,63 @@ letter-spacing: 1px;
 }
 #container{
 overflow:hidden !important;
-overflow-y:hidden !important;
+z-index: 999999;
+position: fixed;
+
+}
+
+
+/*************portfolio section************/
+#portfolio{}
+.wmg-container{
+  background: #fff;
+}
+.wmg-container.open{
+  background:#fff;
+}
+
+.wmg-item{
+  width:380px !important;
+  height:500px !important;
+  margin-top:15px;
+  border:2px solid #efefef;
+  margin:5px;
+  margin-top:15px;
+//  border-radius: 5px;
+}
+
+.wmg-thumbnail-content img{
+    max-width:100% !important;
+    max-height:140% !important;     
+}
+
+.wmg-close{
+  background: url(../images/wmg-btn-close.png) no-repeat 0px 0px;
+}
+
+.wmg-details-content{
+  padding: 10px;
+  margin-bottom:50px;
+ // border-radius: 5px;
+}
+
+.wmg-container img{max-height: 500px;}
+
+#portfolio .container{
+ /* width:100% !important; */
+}
+
+#portfolio .container .row .col-md-6:nth-child(1){text-align: center;}
+
+.wmg-details-content hr{
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eee;
+  background: transparent;
+  width: 100%;
+}
+
+.carousel-inner>.item>img{
+  margin:0px auto;
 }

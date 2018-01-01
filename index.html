@@ -16,602 +16,764 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
-
-
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/jquery.wm-gridfolio-1.0.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+
     <link rel="stylesheet" href="css/flexslider.css">
     <link rel="stylesheet" href="css/jquery.fancybox.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/animate.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
 
 </head>
 
 <body>
-<div id="container"></div>
-	<div id="info">
-		
-		<div id="notSupported" style="display:none">Sorry your graphics card + browser does not support hardware instancing</div>
-	</div>
-<script src="js/libs/dat.gui.min.js"></script>
-	<script src="build/three.js"></script>
-	<script src="js/Detector.js"></script>
-	<script src="js/libs/stats.min.js"></script>
+    <div id="container"></div>
+    <div id="info">
 
-<script id="vertexShader" type="x-shader/x-vertex">
-		precision highp float;
+        <div id="notSupported" style="display:none">Sorry your graphics card + browser does not support hardware instancing</div>
+    </div>
+    <script src="js/libs/dat.gui.min.js"></script>
+    <script src="build/three.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/libs/stats.min.js"></script>
 
-		uniform float sineTime;
+    <script id="vertexShader" type="x-shader/x-vertex">
+        precision highp float; uniform float sineTime; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; attribute vec3
+        position; attribute vec3 offset; attribute vec4 color; attribute vec4 orientationStart; attribute vec4 orientationEnd;
+        varying vec3 vPosition; varying vec4 vColor; void main(){ vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ),
+        0.5 ) + position; vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) ); vec3 vcV = cross(
+        orientation.xyz, vPosition ); vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 +
+        vPosition ); vColor = color; gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 ); }
 
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
+    </script>
 
-		attribute vec3 position;
-		attribute vec3 offset;
-		attribute vec4 color;
-		attribute vec4 orientationStart;
-		attribute vec4 orientationEnd;
+    <script id="fragmentShader" type="x-shader/x-fragment">
 
-		varying vec3 vPosition;
-		varying vec4 vColor;
+        precision highp float; uniform float time; varying vec3 vPosition; varying vec4 vColor; void main() { vec4 color = vec4(
+        vColor ); color.r += sin( vPosition.x * 10.0 + time ) * 0.5; gl_FragColor = color; }
 
-		void main(){
+    </script>
 
-			vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
-			vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) );
-			vec3 vcV = cross( orientation.xyz, vPosition );
-			vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
+    <script>
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-			vColor = color;
+        var container, stats;
 
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+        var camera, scene, renderer;
 
-		}
+        init();
+        animate();
 
-	</script>
+        function init() {
 
-	<script id="fragmentShader" type="x-shader/x-fragment">
+            container = document.getElementById('container');
 
-		precision highp float;
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10);
+            camera.position.z = 2;
 
-		uniform float time;
+            scene = new THREE.Scene();
 
-		varying vec3 vPosition;
-		varying vec4 vColor;
+            // geometry
 
-		void main() {
+            var vector = new THREE.Vector4();
 
-			vec4 color = vec4( vColor );
-			color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
+            var triangles = 1;
+            var instances = 50000;
 
-			gl_FragColor = color;
+            var positions = [];
+            var offsets = [];
+            var colors = [];
+            var orientationsStart = [];
+            var orientationsEnd = [];
 
-		}
+            positions.push(0.025, -0.025, 0);
+            positions.push(-0.025, 0.025, 0);
+            positions.push(0, 0, 0.025);
 
-	</script>
+            // instanced attributes
 
-	<script>
-		
+            for (var i = 0; i < instances; i++) {
 
-		if ( !Detector.webgl ) Detector.addGetWebGLMessage();
+                // offsets
 
-		var container, stats;
+                offsets.push(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 
-		var camera, scene, renderer;
+                // colors
 
-		init();
-		animate();
+                colors.push(Math.random(), Math.random(), Math.random(), Math.random());
 
-		function init() {
+                // orientation start
 
-			container = document.getElementById( 'container' );
+                vector.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+                vector.normalize();
 
-			camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10 );
-			camera.position.z = 2;
+                orientationsStart.push(vector.x, vector.y, vector.z, vector.w);
 
-			scene = new THREE.Scene();
+                // orientation end
 
-			// geometry
+                vector.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+                vector.normalize();
 
-			var vector = new THREE.Vector4();
+                orientationsEnd.push(vector.x, vector.y, vector.z, vector.w);
 
-			var triangles = 1;
-			var instances = 50000;
+            }
 
-			var positions = [];
-			var offsets = [];
-			var colors = [];
-			var orientationsStart = [];
-			var orientationsEnd = [];
+            var geometry = new THREE.InstancedBufferGeometry();
+            geometry.maxInstancedCount = instances; // set so its initalized for dat.GUI, will be set in first draw otherwise
 
-			positions.push( 0.025, -0.025, 0 );
-			positions.push( -0.025, 0.025, 0 );
-			positions.push( 0, 0, 0.025 );
+            geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
-			// instanced attributes
+            geometry.addAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3));
+            geometry.addAttribute('color', new THREE.InstancedBufferAttribute(new Float32Array(colors), 4));
+            geometry.addAttribute('orientationStart', new THREE.InstancedBufferAttribute(new Float32Array(orientationsStart), 4));
+            geometry.addAttribute('orientationEnd', new THREE.InstancedBufferAttribute(new Float32Array(orientationsEnd), 4));
 
-			for ( var i = 0; i < instances; i ++ ) {
+            // material
 
-				// offsets
+            var material = new THREE.RawShaderMaterial({
 
-				offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+                uniforms: {
+                    time: { value: 1.0 },
+                    sineTime: { value: 1.0 }
+                },
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+                side: THREE.DoubleSide,
+                transparent: true
 
-				// colors
+            });
 
-				colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
+            //
 
-				// orientation start
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
 
-				vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-				vector.normalize();
+            //
 
-				orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
 
-				// orientation end
+            if (renderer.extensions.get('ANGLE_instanced_arrays') === false) {
 
-				vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-				vector.normalize();
+                document.getElementById('notSupported').style.display = '';
+                return;
 
-				orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
+            }
 
-			}
+            //
 
-			var geometry = new THREE.InstancedBufferGeometry();
-			geometry.maxInstancedCount = instances; // set so its initalized for dat.GUI, will be set in first draw otherwise
+            //var gui = new dat.GUI( { width: 350 } );
+            //gui.add( geometry, 'maxInstancedCount', 0, instances );
 
-			geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+            //
 
-			geometry.addAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
-			geometry.addAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-			geometry.addAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
-			geometry.addAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+            //stats = new Stats();
+            //container.appendChild( stats.dom );
 
-			// material
+            //
 
-			var material = new THREE.RawShaderMaterial( {
+            window.addEventListener('resize', onWindowResize, false);
 
-				uniforms: {
-					time: { value: 1.0 },
-					sineTime: { value: 1.0 }
-				},
-				vertexShader: document.getElementById( 'vertexShader' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-				side: THREE.DoubleSide,
-				transparent: true
+        }
 
-			} );
+        function onWindowResize(event) {
 
-			//
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
 
-			var mesh = new THREE.Mesh( geometry, material );
-			scene.add( mesh );
+            renderer.setSize(window.innerWidth, window.innerHeight);
 
-			//
+        }
 
-			renderer = new THREE.WebGLRenderer();
-			renderer.setPixelRatio( window.devicePixelRatio );
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			container.appendChild( renderer.domElement );
+        //
 
-			if ( renderer.extensions.get( 'ANGLE_instanced_arrays' ) === false ) {
+        function animate() {
 
-				document.getElementById( 'notSupported' ).style.display = '';
-				return;
+            requestAnimationFrame(animate);
 
-			}
+            render();
+            //stats.update();
 
-			//
+        }
 
-			//var gui = new dat.GUI( { width: 350 } );
-			//gui.add( geometry, 'maxInstancedCount', 0, instances );
+        function render() {
 
-			//
+            var time = performance.now();
 
-			//stats = new Stats();
-			//container.appendChild( stats.dom );
+            var object = scene.children[0];
 
-			//
+            object.rotation.y = time * 0.0005;
+            object.material.uniforms.time.value = time * 0.02;
+            object.material.uniforms.sineTime.value = Math.sin(object.material.uniforms.time.value * 0.05);
 
-			window.addEventListener( 'resize', onWindowResize, false );
+            renderer.render(scene, camera);
 
-		}
-
-		function onWindowResize( event ) {
-
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize( window.innerWidth, window.innerHeight );
-
-		}
-
-		//
-
-		function animate() {
-
-			requestAnimationFrame( animate );
-
-			render();
-			//stats.update();
-
-		}
-
-		function render() {
-
-			var time = performance.now();
-
-			var object = scene.children[ 0 ];
-
-			object.rotation.y = time * 0.0005;
-			object.material.uniforms.time.value = time * 0.02;
-			object.material.uniforms.sineTime.value = Math.sin( object.material.uniforms.time.value * 0.05 );
-
-			renderer.render( scene, camera );
-
-		}
-
-	</script>
-<div id="siteContainer" style="display:none">
-    <section class="banner" role="banner">
-        <header id="header">
-            <div class="header-content clearfix">
-                <a class="logo" href="#"><img src="images/logo.png" alt=""></a>
-                <nav class="navigation" role="navigation">
-                    <ul class="primary-nav">
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#works">Works</a></li>
-                        <li><a href="#teams">Our Team</a></li>
-                        <li><a href="#testimonials">Testimonials</a></li>
-                        <li><a href="#download">Download</a></li>
-                    </ul>
-                </nav>
-                <a href="#" class="nav-toggle">Menu<span></span></a>
-            </div>
-            <!-- header content -->
-        </header>
-        <!-- header -->
-        <div class="container">
-            <div class="col-md-10 col-md-offset-1">
-                <div class="banner-text text-center">
-                    <h1>WE ARE ACTIVEDEV</h1>
-                    <p>Full-Service Web/mobile Solutions Agency</p>
-                    <a href="#" class="btn btn-large">Find out more</a>
-                </div>
-                <!-- banner text -->
-            </div>
-        </div>
-    </section>
-    <!-- banner -->
-    <!--extra features-->
-    <section class="bg-inverse" id="extra-features">
-        <div class="container">
-            <div class="row">
-                <div class="section-title col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-xs-12 text-center wow fadeIn">
-                    <h2 class="text-orange">ABOUT US</h2>
-                    <hr>
-                </div>
-            </div>
-            <div class="row d-md-flex mt-5">
-                <div class="col-sm-3 wow fadeIn">
-                    <h5 class="text-orange">Who We Are</h5>
-                    <p>ACTIVDEV is a Web Solutions Engineering Agency located in Egypt. This is one of the best offshore locations
-                        to outsource your Web & Mobile needs.
-                        </br>
-                        </br>
-                        Our main focus is saving your time and efforts by providing full-cycle product development from gathering your requirements,
-                        designing, coding, testing, documenting, and finally maintaining, all with high-quality, cost-effective
-                        solutions under any constraints agreed upon.</p>
-                </div>
-                <div class="col-sm-6 wow fadeIn">
-                    <img class="img-fluid mx-auto d-block pb-3" src="images/shot-3.png" alt="Gallery">
-                </div>
-                <div class="col-sm-3 wow fadeIn">
-                    <h5 class="text-orange">What We Do</h5>
-                    <p>We provide cost-effective Web & Mobile solutions for startups, shops and companies. We are experts in
-                        web & Mobile design, Front-end development, Back-end development, Databases, as well as dealing with
-                        the most frameworks and software.<br/><br/>
-                    </p>
-                    <ul class="UL_services">
-                        <li>CMS Websites.</li>
-                        <li>E-Commerces.</li>
-                        <li>Web Applications.</li>
-                        <li>Mobile Apllications (Android & Ios)</li>
-                        <li>Landing Pages.</li>
-                        <li>Blogs & Social Media.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section id="features" class="features section">
-        <div class="container">
-            <div class="row">
-                <div class="section-title col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-xs-12 text-center wow fadeIn">
-                    <h2>OUR SERVICES</h2>
-                    <hr>
-                </div>
-            </div>
-            <div class="row d-md-flex mt-5">
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-desktop"></span>
-                    <div class="feature-content">
-                        <h5>ًWeb Design</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-laptop"></span>
-                    <div class="feature-content">
-                        <h5>Web Development</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-android"></span>
-                    <div class="feature-content">
-                        <h5>Android Applications</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-apple"></span>
-                    <div class="feature-content">
-                        <h5>IOS Applications</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-mobile"></span>
-                    <div class="feature-content">
-                        <h5>Hybird Mobile Applications</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 feature text-center">
-                    <span class="fa fa-database"></span>
-                    <div class="feature-content">
-                        <h5>DataBase Design</h5>
-                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis ornare
-                            vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- features -->
-    <!--
-    <section id="works" class="works section no-padding">
-        <div class="container-fluid">
-            <div class="row no-gutter">
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-1.jpg" class="work-box">
-                        <img src="images/work-1.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-2.jpg" class="work-box">
-                        <img src="images/work-2.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-3.jpg" class="work-box">
-                        <img src="images/work-3.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-4.jpg" class="work-box">
-                        <img src="images/work-4.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-5.jpg" class="work-box">
-                        <img src="images/work-5.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-6.jpg" class="work-box">
-                        <img src="images/work-6.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-7.jpg" class="work-box">
-                        <img src="images/work-7.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 work">
-                    <a href="images/work-8.jpg" class="work-box">
-                        <img src="images/work-8.jpg" alt="">
-                        <div class="overlay">
-                            <div class="overlay-caption">
-                                <h5>Project Name</h5>
-                                <p>Website Design</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
--->
-    <!-- works -->
-
-    <section id="teams" class="section teams">
-        <div class="container">
-            <div class="row">
-                <div class="section-title col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-xs-12 text-center wow fadeIn">
-                    <h2 class="text-orange">DEVELOPMENT TEAM</h2>
-                    <hr>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 col-md-offset-2 col-sm-6">
-                    <div class="person">
-                        <img src="images/ahmed.jpg" alt="" class="img-responsive">
-                        <div class="person-content">
-                            <h4>Ahmed Abdelfattah</h4>
-                            <h5 class="role">Co-Founder, Developer</h5>
-                            <p>Front-End & Android Developer</p>
-                        </div>
-                        <ul class="social-icons clearfix">
-                            <li><a href="#"><span class="fa fa-facebook"></span></a></li>
-                            <li><a href="#"><span class="fa fa-twitter"></span></a></li>
-                            <li><a href="#"><span class="fa fa-linkedin"></span></a></li>
-                            <li><a href="#"><span class="fa fa-google-plus"></span></a></li>
-                            <li><a href="#"><span class="fa fa-dribbble"></span></a></li>
+        }
+    </script>
+    <div id="siteContainer">
+        <section class="banner" role="banner">
+            <header id="header">
+                <div class="header-content clearfix">
+                    <a href="#"><img  src="images/logo.png"></a>
+                    <nav class="navigation" role="navigation">
+                        <ul class="primary-nav">
+                            <li><a href="#aboutus">About us</a></li>
+                            <li><a href="#services">Services</a></li>
+                            <li><a href="#portfolio">Portfolio</a></li>
+                            <li><a href="#teams">Our Team</a></li>
+                            <li><a href="#contact_us">Contact Us</a></li>
                         </ul>
-                    </div>
-                    <!-- person -->
+                    </nav>
+                    <a href="#" class="nav-toggle">Menu<span></span></a>
                 </div>
-                <div class="col-md-4 col-sm-6">
-                    <div class="person">
-                        <img src="images/hossam.jpg" alt="" class="img-responsive">
-                        <div class="person-content">
-                            <h4>Hossam Gamal</h4>
-                            <h5 class="role">Co-Founder, Developer</h5>
-                            <p>Back-End & IOS Developer</p>
-                        </div>
-                        <ul class="social-icons clearfix">
-                            <li><a href="#" class=""><span class="fa fa-facebook"></span></a></li>
-                            <li><a href="#" class=""><span class="fa fa-twitter"></span></a></li>
-                            <li><a href="#" class=""><span class="fa fa-linkedin"></span></a></li>
-                            <li><a href="#" class=""><span class="fa fa-google-plus"></span></a></li>
-                            <li><a href="#" class=""><span class="fa fa-dribbble"></span></a></li>
-                        </ul>
+                <!-- header content -->
+            </header>
+            <!-- header -->
+            <div class="container">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="banner-text text-center">
+                        <h1 id="siteIntro"></h1>
+                        <p id="siteDescription" </p>
                     </div>
-                    <!-- person -->
+                    <!-- banner text -->
                 </div>
             </div>
-        </div>
-    </section>
-    <!-- teams -->
-    <footer class="footer">
-        <div class="footer-top">
+        </section>
+        <!-- banner -->
+        <!--About Us-->
+        <section id="aboutus" class="section bg-inverse" >
             <div class="container">
                 <div class="row">
-                    <div class="section-title col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-xs-12 text-center wow fadeIn">
-                        <h2 class="text-orange">Contact Us</h2>
+                    <div class="section-title text-center wow fadeIn">
+                        <h2 class="text-orange">ABOUT US</h2>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row d-md-flex mt-5">
+                    <div class="col-sm-3 wow fadeIn">
+                        <h5 class="text-orange">Who We Are</h5>
+                        <p>ACTIVDEV is a Web Solutions Engineering Agency located in Egypt. This is one of the best offshore
+                            locations to outsource your Web & Mobile needs.
+                            </br>
+                            </br>
+                            Our main focus is saving your time and efforts by providing full-cycle product development from gathering your requirements,
+                            designing, coding, testing, documenting, and finally maintaining, all with high-quality, cost-effective
+                            solutions under any constraints agreed upon.</p>
+                    </div>
+                    <div class="col-sm-6 wow fadeIn">
+                        <img class="col-sm-12" src="images/shot-3.png" alt="Gallery">
+                    </div>
+                    <div class="col-sm-3 wow fadeIn">
+                        <h5 class="text-orange">What We Do</h5>
+                        <p>We provide cost-effective Web & Mobile solutions for startups, shops and companies. We are experts
+                            in web & Mobile design, Front-end development, Back-end development, Databases, as well as dealing
+                            with the most frameworks and software.<br/><br/>
+                        </p>
+                        <ul class="UL_services">
+                            <li>CMS Websites.</li>
+                            <li>E-Commerces.</li>
+                            <li>Web Applications.</li>
+                            <li>Mobile Apllications (Android & Ios)</li>
+                            <li>Landing Pages.</li>
+                            <li>Blogs & Social Media.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="services" class="section features">
+            <div class="container">
+                <div class="row">
+                    <div class="section-title text-center wow fadeIn">
+                        <h2>OUR SERVICES</h2>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row d-md-flex mt-5">
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-desktop"></span>
+                        <div class="feature-content">
+                            <h5>ًWeb Design</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-laptop"></span>
+                        <div class="feature-content">
+                            <h5>Web Development</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-android"></span>
+                        <div class="feature-content">
+                            <h5>Android Applications</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-apple"></span>
+                        <div class="feature-content">
+                            <h5>IOS Applications</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-mobile"></span>
+                        <div class="feature-content">
+                            <h5>Hybird Mobile Applications</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 feature text-center">
+                        <span class="fa fa-database"></span>
+                        <div class="feature-content">
+                            <h5>DataBase Design</h5>
+                            <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Nullam quis risus eget urna mollis
+                                ornare vel eu leo. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="portfolio" class="section portfolio">
+            <div class="container">
+                <div class="row">
+                    <div class="section-title text-center wow fadeIn">
+                        <h2 class="text-orange">Our Portfolio</h2>
                         <hr>
                     </div>
                 </div>
                 <div class="row">
+                    <div class="wmg-container my-grid">
 
-                    <div class="footer-col col-md-4">
-                        <span class="fa fa-map-marker fa-2x"></span>
-                        <p>Cairo,Egypt</p>
-                    </div>
-                    <div class="footer-col col-md-4">
-                        <span class="fa fa-envelope-o fa-2x"></span>
-                        <p>info@activedev.com</p>
-                        <p>sales@activedev.com</p>
+                        <div class="wmg-item">
+                            <div class="wmg-thumbnail">
+                                <div class="wmg-thumbnail-content">
+                                    <!-- exemplo de conteudo para thumbnail -->
+                                    <img src="images/ERPMobileApp.png" alt="image">
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                                <div class="wmg-arrow"></div>
+                            </div>
+                            <div class="wmg-details">
+                                <span class="wmg-close"></span>
+                                <div class="wmg-details-content">
+
+                                    <!-- exemplo de coteúdo para detail -->
+                                    <div class="container exemplo">
+                                        <div class="row">
+                                            <div class="col-md-4">
+
+                                                <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                                                    <!-- Indicators -->
+                                                    <ol class="carousel-indicators">
+                                                        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                                                        <li data-target="#myCarousel" data-slide-to="1"></li>
+                                                        <li data-target="#myCarousel" data-slide-to="2"></li>
+                                                    </ol>
+
+
+                                                    <!-- Wrapper for slides -->
+                                                    <div class="carousel-inner">
+                                                        <div class="item active">
+                                                            <img src="images/port1.jpg" alt="Los Angeles">
+                                                            <div class="carousel-caption">
+                                                                <h3>Chicago</h3>
+                                                                <p>Thank you, Chicago!</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="item">
+                                                            <img src="images/port2.jpg" alt="Chicago">
+                                                            <div class="carousel-caption">
+                                                                <h3>Chicago</h3>
+                                                                <p>Thank you, Chicago!</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="item">
+                                                            <img src="images/port3.jpg" alt="New York">
+                                                            <div class="carousel-caption">
+                                                                <h3>Chicago</h3>
+                                                                <p>Thank you, Chicago!</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Left and right controls -->
+                                                    <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                                                      <span class="glyphicon glyphicon-chevron-left"></span>
+                                                      <span class="sr-only">Previous</span>
+                                                    </a>
+                                                    <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                                                      <span class="glyphicon glyphicon-chevron-right"></span>
+                                                      <span class="sr-only">Next</span>
+                                                    </a>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h2>Lorem ipsum 1</h2>
+                                                <hr>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <p>
+                                                    Ut iaculis vestibulum libero, vel ultrices metus aliquet vel. Vestibulum pulvinar tincidunt quam, in sagittis ex sagittis
+                                                    id.
+                                                </p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <a href="#" class="btn btn-primary btn-lg" title="Lorem ipsum">Lorem ipsum</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .wmg-item -->
+
+                        <div class="wmg-item">
+                            <div class="wmg-thumbnail">
+                                <div class="wmg-thumbnail-content">
+
+                                    <!-- exemplo de conteudo para thumbnail -->
+                                    <img src="images/port1.jpg" alt="image">
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                                <div class="wmg-arrow"></div>
+                            </div>
+                            <div class="wmg-details">
+                                <span class="wmg-close"></span>
+                                <div class="wmg-details-content">
+
+                                    <!-- exemplo de coteúdo para detail -->
+                                    <div class="container exemplo">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <img src="images/port1.jpg" alt="image">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h2>Lorem ipsum 2</h2>
+                                                <hr>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <p>
+                                                    Ut iaculis vestibulum libero, vel ultrices metus aliquet vel. Vestibulum pulvinar tincidunt quam, in sagittis ex sagittis
+                                                    id.
+                                                </p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <a href="#" class="btn btn-primary btn-lg" title="Lorem ipsum">Lorem ipsum</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .wmg-item -->
+
+                        <div class="wmg-item">
+                            <div class="wmg-thumbnail">
+                                <div class="wmg-thumbnail-content">
+
+                                    <!-- exemplo de conteudo para thumbnail -->
+                                    <img src="images/port2.jpg" alt="image">
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                                <div class="wmg-arrow"></div>
+                            </div>
+                            <div class="wmg-details">
+                                <span class="wmg-close"></span>
+                                <div class="wmg-details-content">
+
+                                    <!-- exemplo de coteúdo para detail -->
+                                    <div class="container exemplo">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <img src="images/port2.jpg" alt="image">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h2>Lorem ipsum 3</h2>
+                                                <hr>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <p>
+                                                    Ut iaculis vestibulum libero, vel ultrices metus aliquet vel. Vestibulum pulvinar tincidunt quam, in sagittis ex sagittis
+                                                    id.
+                                                </p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <a href="#" class="btn btn-primary btn-lg" title="Lorem ipsum">Lorem ipsum</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .wmg-item -->
+
+                        <div class="wmg-item">
+                            <div class="wmg-thumbnail">
+                                <div class="wmg-thumbnail-content">
+
+                                    <!-- exemplo de conteudo para thumbnail -->
+                                    <img src="images/port3.jpg" alt="image">
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                                <div class="wmg-arrow"></div>
+                            </div>
+                            <div class="wmg-details">
+                                <span class="wmg-close"></span>
+                                <div class="wmg-details-content">
+
+                                    <!-- exemplo de coteúdo para detail -->
+                                    <div class="container exemplo">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <img src="images/port3.jpg" alt="image">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h2>Lorem ipsum 4</h2>
+                                                <hr>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <p>
+                                                    Ut iaculis vestibulum libero, vel ultrices metus aliquet vel. Vestibulum pulvinar tincidunt quam, in sagittis ex sagittis
+                                                    id.
+                                                </p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <a href="#" class="btn btn-primary btn-lg" title="Lorem ipsum">Lorem ipsum</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .wmg-item -->
+
+                        <div class="wmg-item">
+                            <div class="wmg-thumbnail">
+                                <div class="wmg-thumbnail-content">
+
+                                    <!-- exemplo de conteudo para thumbnail -->
+                                    <img src="images/port4.jpg" alt="image">
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                                <div class="wmg-arrow"></div>
+                            </div>
+                            <div class="wmg-details">
+                                <span class="wmg-close"></span>
+                                <div class="wmg-details-content">
+
+                                    <!-- exemplo de coteúdo para detail -->
+                                    <div class="container exemplo">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <img src="images/port4.jpg" alt="image">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h2>Lorem ipsum 5</h2>
+                                                <hr>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <p>
+                                                    Ut iaculis vestibulum libero, vel ultrices metus aliquet vel. Vestibulum pulvinar tincidunt quam, in sagittis ex sagittis
+                                                    id.
+                                                </p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia ex non arcu tempus, non venenatis elit facilisis. Proin
+                                                    fringilla nibh ante, ac luctus lectus ornare maximus
+                                                </p>
+                                                <a href="#" class="btn btn-primary btn-lg" title="Lorem ipsum">Lorem ipsum</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- fim do exemplo -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .wmg-item -->
 
                     </div>
-                    <div class="footer-col col-md-4">
-                        <i class="fa fa-phone fa-2x"></i>
-                        <p>+2 011 153 069 18</p>
-                        <p>+2 011 153 069 18</p>
-                    </div>
+                    <!-- .my-grid -->
                 </div>
             </div>
-        </div>
-        <!-- footer top -->
-        <div class="footer-bottom">
+        </section>
+        <section id="teams" class="section teams">
             <div class="container">
-                <div class="col-md-12">
-
-                    <H4>Follow Us</H4>
-                    <ul class="footer-share">
-                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                        <li><a href="https://twitter.com/kamal_chaneman"><i class="fa fa-twitter"></i></a></li>
-                        <li><a href="https://www.linkedin.com/in/kamalchaneman"><i class="fa fa-linkedin"></i></a></li>
-                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                    </ul>
-
-                    <p>Copyright © ActivDev 2017</p>
+                <div class="row">
+                    <div class="section-title text-center wow fadeIn">
+                        <h2 class="text-orange">DEVELOPMENT TEAM</h2>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2 col-sm-6">
+                        <div class="person">
+                            <img src="images/ahmed.jpg" alt="" class="img-responsive">
+                            <div class="person-content">
+                                <h4>Ahmed Abdelfattah</h4>
+                                <h5 class="role">Co-Founder, Developer</h5>
+                                <p>Front-End & Android Developer</p>
+                            </div>
+                            <ul class="social-icons clearfix">
+                                <li><a href="#"><span class="fa fa-facebook"></span></a></li>
+                                <li><a href="#"><span class="fa fa-twitter"></span></a></li>
+                                <li><a href="#"><span class="fa fa-linkedin"></span></a></li>
+                                <li><a href="#"><span class="fa fa-google-plus"></span></a></li>
+                                <li><a href="#"><span class="fa fa-dribbble"></span></a></li>
+                            </ul>
+                        </div>
+                        <!-- person -->
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="person">
+                            <img src="images/hossam.jpg" alt="" class="img-responsive">
+                            <div class="person-content">
+                                <h4>Hossam Gamal</h4>
+                                <h5 class="role">Co-Founder, Developer</h5>
+                                <p>Back-End & IOS Developer</p>
+                            </div>
+                            <ul class="social-icons clearfix">
+                                <li><a href="#" class=""><span class="fa fa-facebook"></span></a></li>
+                                <li><a href="#" class=""><span class="fa fa-twitter"></span></a></li>
+                                <li><a href="#" class=""><span class="fa fa-linkedin"></span></a></li>
+                                <li><a href="#" class=""><span class="fa fa-google-plus"></span></a></li>
+                                <li><a href="#" class=""><span class="fa fa-dribbble"></span></a></li>
+                            </ul>
+                        </div>
+                        <!-- person -->
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
-</div>
-    <!-- footer -->
+        </section>
+        <!-- teams -->
+        <section id="contact_us" class="footer">
+            <div class="footer-top">
+                <div class="container">
+                    <div class="row">
+                        <div class="section-title text-center wow fadeIn">
+                            <h2 class="text-orange">Contact Us</h2>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>
-        window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
-    </script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/jquery.flexslider-min.js"></script>
-    <script src="js/jquery.fancybox.pack.js"></script>
-    <script src="js/jquery.waypoints.min.js"></script>
-    <script src="js/retina.min.js"></script>
-    <script src="js/modernizr.js"></script>
-    <script src="js/main.js"></script>
+                        <div class="footer-col col-md-4">
+                            <span class="fa fa-map-marker fa-2x"></span>
+                            <p>Cairo,Egypt</p>
+                        </div>
+                        <div class="footer-col col-md-4">
+                            <span class="fa fa-envelope-o fa-2x"></span>
+                            <p>info@activedev.com</p>
+                            <p>sales@activedev.com</p>
+
+                        </div>
+                        <div class="footer-col col-md-4">
+                            <i class="fa fa-phone fa-2x"></i>
+                            <p>+2 011 153 069 18</p>
+                            <p>+2 011 153 069 18</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- footer top -->
+            <div class="footer-bottom">
+                <div class="container">
+                    <div class="col-md-12">
+
+                        <H4>Follow Us</H4>
+                        <ul class="footer-share">
+                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="https://twitter.com/kamal_chaneman"><i class="fa fa-twitter"></i></a></li>
+                            <li><a href="https://www.linkedin.com/in/kamalchaneman"><i class="fa fa-linkedin"></i></a></li>
+                            <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                        </ul>
+
+                        <p>Copyright © ActivDev 2017</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- footer -->
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/my_libs/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="js/my_libs/jquery.wm-gridfolio-1.0.min.js"></script>
+
+
+    <script src="js/my_libs/typewriter.js"></script>
+    <script src="js/my_libs/jquery.flexslider-min.js"></script>
+    <script src="js/my_libs/jquery.fancybox.pack.js"></script>
+    <script src="js/my_libs/jquery.waypoints.min.js"></script>
+    <script src="js/my_libs/retina.min.js"></script>
+    <script src="js/my_libs/modernizr.js"></script>
+    <script src="js/my_libs/main.js"></script>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
     <script>
-            (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date(); a = s.createElement(o),
-                    m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
         ga('create', 'UA-XXXX-X');
         ga('send', 'pageview');
-setTimeout(function(){$("#container").hide();$("#siteContainer").show();},5000);
+    </script>
+
+    <script src="js/my_libs/custom.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.my-grid').WMGridfolio();
+        });
     </script>
 </body>
 
 </html>
- 
