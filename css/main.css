@@ -943,10 +943,11 @@ position: fixed;
   width:380px !important;
   height:500px !important;
   margin-top:15px;
-  border:2px solid #efefef;
+  border:1px solid #e84642;
   margin:5px;
   margin-top:15px;
 //  border-radius: 5px;
+
 }
 
 .wmg-thumbnail-content img{
@@ -959,11 +960,18 @@ position: fixed;
 }
 
 .wmg-details-content{
-  padding: 10px;
-  margin-bottom:50px;
- // border-radius: 5px;
+ background:transparent;
+  border: 2px solid #e84642;
 }
 
+.wmg-details-content .exemplo{
+  padding-top: 5px;
+  padding-bottom: 5px;
+}  
+
+.wmg-arrow {
+  border-bottom-color: #e84642;
+}
 .wmg-container img{max-height: 500px;}
 
 #portfolio .container{
