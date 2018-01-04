@@ -449,7 +449,7 @@ ul li {
     background-color: #313454;
     padding: 20px 0; }
   .footer .footer-col {
-    margin-bottom: 80px; }
+    margin-bottom: 20px; }
   .footer h5 {
     color: #fff; }
   .footer h5 {
@@ -960,10 +960,15 @@ position: fixed;
 }
 
 .wmg-details-content{
- background:transparent;
-  border: 2px solid #e84642;
+  background:transparent;
+  border: 1px solid #e84642;
+  color:#fff;
 }
-
+/*
+.wmg-details-content.*{
+  color:#fff;
+}
+*/
 .wmg-details-content .exemplo{
   padding-top: 5px;
   padding-bottom: 5px;
@@ -991,4 +996,16 @@ position: fixed;
 
 .carousel-inner>.item>img{
   margin:0px auto;
+}
+
+
+#contact_form{
+  margin-bottom:20px;
+}
+#contact_form input,#contact_form textarea{
+  color:#000 !important;
+}
+
+#contact_form h3{
+  margin-bottom:25px;
 }

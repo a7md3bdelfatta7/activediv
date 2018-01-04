@@ -20,7 +20,7 @@ setTimeout(function () {
             var typewriter = new Typewriter(app, {
                 loop: false, typingSpeed: 60,
             });
-            typewriter.typeString('Full-Service Web/mobile Solutions Agency')
+            typewriter.typeString('We Presents Creative Web & mobile Solutions.')
                 .pauseFor(2500)
                 .start();
             setTimeout(function () {
